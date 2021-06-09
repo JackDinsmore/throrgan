@@ -4,6 +4,15 @@ version = "0.1.0"
 authors = ["Jack Dinsmore <jtdinsmo@mit.edu>"]
 edition = "2018"
 
+[lib]
+name = "throrgan"
+path = "src/lib.rs"
+
+[[bin]]
+name = "test"
+path = "src/bin.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
