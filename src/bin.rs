@@ -6,5 +6,5 @@
 use throrgan;
 
 fn main() {
-    throrgan::compile("foo.txt", "").unwrap();
+    throrgan::compile("foo.txt", "bar.wav").unwrap();
 }
