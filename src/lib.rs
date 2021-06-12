@@ -12,6 +12,7 @@ mod errors;
 mod parse;
 mod instrument;
 mod generator;
+mod output;
 
 /// Compiles a file and generates a wave file
 /// # Errors
@@ -20,10 +21,10 @@ mod generator;
 pub fn compile(input_file: &str, output_file: &str) 
 -> errors::Result<()> {
     // Check if the output file exists
-    if Path::new(output_file).exists() {
+    /*if Path::new(output_file).exists() {
         return Err(io::Error::new(io::ErrorKind::AlreadyExists, 
             format!("The file {} already exists", input_file)).into());
-    }
+    }*/
     if output_file.len() < 4 || !output_file[output_file.len()-4..].eq(".wav") {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, 
             "You must specify a valid .wav file as output").into());
@@ -34,7 +35,7 @@ pub fn compile(input_file: &str, output_file: &str)
 
     let header = parse::get_header(&contents, input_file)?;
 
-    let bd = parse::breakdown(&header, &contents, input_file);
+    parse::generate(&header, &contents, input_file, output_file)?;
 
     Ok(())
 }

@@ -21,7 +21,7 @@ enum Mode {
 /// what instruments it is written for
 pub struct Header {
     instruments: Vec<Instrument>,
-    tempo: i32,
+    tempo: u32,
     begin_music: usize,
     end_music: usize,
 }
@@ -37,7 +37,7 @@ impl Header {
     fn verify(self, name: &str) -> Result<Header> {
         if self.instruments.len() == 0 || self.tempo == 0 ||
             self.begin_music == 0 || self.end_music == 0 {
-            return Err(ParseError::IncompleteHeader(name.to_string()).into());
+            return Err(ParseError::ModeNotHit(name.to_string()).into());
         }
         Ok(self)
     }
@@ -103,7 +103,7 @@ pub fn get_header(content: &str, name: &str) -> Result<Header> {
                                     name.to_string(), num).into()),
                             }.parse()?,
                             _ => return Err(ParseError::InvalidKey(
-                                name.to_string(), num,  key_name.to_string())
+                                name.to_string(), num)
                                 .into()),
                         };
                     }
@@ -118,9 +118,9 @@ pub fn get_header(content: &str, name: &str) -> Result<Header> {
     ret.verify(name)
 }
 
-pub fn breakdown(header: &Header, content: &str, name: &str) 
--> Result<Breakdown> {
-    let mut ret = Breakdown::empty();
+pub fn generate(header: &Header, content: &str, name: &str, output_file: &str) 
+-> Result<()> {
+    let mut bd = Breakdown::new(header.tempo, output_file);
     let mut last_time = 0;
     for (num, line) in content.lines().enumerate().skip(header.begin_music) {
         let mut items = line.split_whitespace();
@@ -168,8 +168,9 @@ pub fn breakdown(header: &Header, content: &str, name: &str)
             None => return Err(ParseError::InvalidValue(name.to_string(), num)
             .into())
         };
-        ret.add_note(&instrument, note, time, note_length, vol);
+        bd.add_note(&instrument, note, time, note_length, vol);
     }
+    bd.push_all();
 
-    Ok(ret)
+    Ok(())
 }
