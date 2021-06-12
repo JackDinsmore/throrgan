@@ -1,7 +1,8 @@
 use std::fs::File;
 use std::path::Path;
+use rustfft::{FftPlanner, num_complex::Complex};
 
-pub const FREQ_SIZE: usize = 1000;
+pub const FREQ_SIZE: usize = 1024;
 pub const SAMPLE_RATE: u32 = 44_100;
 
 pub struct Output {
@@ -23,8 +24,18 @@ impl Output {
         Output {out_file: File::create(Path::new(output_dir)).unwrap(), header }
     }
 
-    pub fn write(&mut self, cqt: &Vec<[f32; FREQ_SIZE]>) {
-        // Data consists of a bunch of integers. Highest I found: 23170.
+    pub fn write(&mut self, cqt: &mut Vec<[Complex<f32>; FREQ_SIZE]>) {
+
+        let mut planner = FftPlanner::<f32>::new();
+        let fft = planner.plan_fft_inverse(FREQ_SIZE);
+
+        println!("{:?}", cqt[0]);
+        fft.process(&mut cqt[0]);
+        println!("{:?}", cqt[0]);
+        println!("");
+
+        // TO DO: Make sure resultant fft is real, then write into data.
+        // TO DO: Update docs.
 
         let data = wav::BitDepth::Sixteen((0..SAMPLE_RATE).map(
             |x| (25000.0 * f32::sin(x as f32 / (SAMPLE_RATE as f32) * 

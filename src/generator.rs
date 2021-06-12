@@ -2,6 +2,7 @@ use crate::instrument::{Instrument, Sound, Damp};
 use std::rc::Rc;
 use std::borrow::Borrow;
 use crate::output::{Output, FREQ_SIZE, SAMPLE_RATE};
+use rustfft::num_complex::Complex;
 
 const MEASURE_LENGTH: usize = 4;
 const BD_SIZE: usize = 2 * MEASURE_LENGTH;
@@ -66,7 +67,7 @@ impl Breakdown {
         for note in self.notes[self.active].iter() {
             let chunk_dur = self.tempo as f32 / 60.0 / (MEASURE_LENGTH as f32);
             let time_size = (SAMPLE_RATE as f32 * chunk_dur) as usize;
-            let mut cqt = vec![[0.0; FREQ_SIZE]; time_size];
+            let mut cqt = vec![[Complex{re:0.0, im:0.0}; FREQ_SIZE]; time_size];
 
             let frequencies: Vec<f32> = (0..FREQ_SIZE).map(
                 |x| index_to_frequency(x)).collect();
@@ -94,7 +95,7 @@ impl Breakdown {
                 }
             };
 
-            self.output.write(&cqt);
+            self.output.write(&mut cqt);
         }
         self.notes[self.active].clear();
         self.active = (self.active + 1) % BD_SIZE;

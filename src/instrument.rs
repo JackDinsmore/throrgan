@@ -38,10 +38,10 @@ impl Sound {
         self.vol * match self.freq {
             Smear::Delta(mean) => {
                 if f32::abs(freq - mean) / mean < 0.001 {
-                    0.0
+                    1.0
                 }
                 else {
-                    1.0
+                    0.0
                 }
             },
             Smear::Gaussian(mean, sigma) => {

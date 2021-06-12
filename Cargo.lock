@@ -144,7 +144,7 @@ checksum = "ab499b8da9f6b09d2edc326e603ba917836a01fc69bdd9907001679fa65e1fcc"
 dependencies = [
  "byteorder",
  "rubato",
- "rustfft",
+ "rustfft 5.1.1",
 ]
 
 [[package]]
@@ -228,7 +228,7 @@ dependencies = [
  "approx",
  "generic-array",
  "matrixmultiply",
- "num-complex",
+ "num-complex 0.3.1",
  "num-rational",
  "num-traits",
  "serde",
@@ -251,6 +251,15 @@ name = "num-complex"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "747d632c0c558b87dbabbe6a82f3b4ae03720d0646ac5b7b4dae89394be5f2c5"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
+name = "num-complex"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26873667bbbb7c5182d4a37c1add32cdf09f841af72da53318fdb81543c15085"
 dependencies = [
  "num-traits",
 ]
@@ -397,7 +406,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78570e3808e54d89bbeeabe064a61923a023d3822023344a9257989316cb107e"
 dependencies = [
- "rustfft",
+ "rustfft 5.1.1",
 ]
 
 [[package]]
@@ -458,7 +467,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "868be3d84861b7f5d4cecf0d8bfb1d95f42bbceecf2804739dd3dd374940d46d"
 dependencies = [
  "log",
- "num-complex",
+ "num-complex 0.3.1",
  "num-integer",
  "num-traits",
  "realfft",
@@ -476,7 +485,21 @@ version = "5.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1869bb2a6ff77380d52ff4bc631f165637035a55855c76aa462c85474dadc42f"
 dependencies = [
- "num-complex",
+ "num-complex 0.3.1",
+ "num-integer",
+ "num-traits",
+ "primal-check",
+ "strength_reduce",
+ "transpose",
+]
+
+[[package]]
+name = "rustfft"
+version = "6.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1d089e5c57521629a59f5f39bca7434849ff89bd6873b521afe389c1c602543"
+dependencies = [
+ "num-complex 0.4.0",
  "num-integer",
  "num-traits",
  "primal-check",
@@ -517,7 +540,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5132a955559188f3d13c9ba831e77c802ddc8782783f050ed0c52f5988b95f4c"
 dependencies = [
  "approx",
- "num-complex",
+ "num-complex 0.3.1",
  "num-traits",
  "paste",
 ]
@@ -544,6 +567,7 @@ name = "throrgan"
 version = "0.1.0"
 dependencies = [
  "rg3d-sound",
+ "rustfft 6.0.1",
  "wav",
 ]
 
