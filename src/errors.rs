@@ -1,4 +1,4 @@
-use std::{error, fmt, io};
+use std::{error, fmt};
 
 
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error + 'static>>;
@@ -9,7 +9,11 @@ pub enum ParseError {
     InvalidMode(String, usize),
     NoModeDeclared(String, usize),
     InvalidSound(String, usize),
-    InvalidDeclaration(String, usize),
+    IncompleteHeader(String),
+    KeyWithoutValue(String, usize),
+    InvalidValue(String, usize),
+    InvalidNoteOrder(String, usize),
+    InvalidKey(String, usize, String),
     Unknown(String, usize),
 }
 
@@ -23,8 +27,18 @@ impl fmt::Display for ParseError {
                 "Instrument {} line {}: No mode declared.", name, num),
             ParseError::InvalidSound(name, num) =>  write!(f,
                 "Instrument {} line {}: Invalid sound format.", name, num),
-            ParseError::InvalidDeclaration(name, num) =>  write!(f,
-                "Instrument {} line {}: Invalid declaration.", name, num),
+            ParseError::IncompleteHeader(name) =>  write!(f,
+                "File {}: Incomplete header.", name),
+            ParseError::KeyWithoutValue(name, num) =>  write!(f,
+                "Instrument {} line {}: Key given without value.", name, num),
+            ParseError::InvalidValue(name, num) =>  write!(f,
+                "Instrument {} line {}: An invalid value was encountered.",
+                name, num),
+            ParseError::InvalidNoteOrder(name, num) =>  write!(f,
+                "Instrument {} line {}: Invalid note order.",
+                name, num),
+            ParseError::InvalidKey(name, num, key) =>  write!(f,
+                "Instrument {} line {}: Key {} is invalid.", name, num, key),
             ParseError::Unknown(name, num) =>  write!(f,
                 "Instrument {} line {}: Unknown error.", name, num),
             // TO DO: Implement file and line numbers.

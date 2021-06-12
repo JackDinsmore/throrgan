@@ -34,5 +34,7 @@ pub fn compile(input_file: &str, output_file: &str)
 
     let header = parse::get_header(&contents, input_file)?;
 
+    let bd = parse::breakdown(&header, &contents, input_file);
+
     Ok(())
 }
