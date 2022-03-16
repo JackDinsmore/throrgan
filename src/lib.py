@@ -4,17 +4,10 @@ from scipy.io.wavfile import write
 import numpy as np
 import matplotlib.pyplot as plt
 
-CHUNK_LENGTH = 3
+CHUNK_LENGTH = 3.1
 MIDDLE_C = 261.625565
 SUBDIVIDE = 7*7#*5#*5#49
 SAMPLE_RATE = 22050
-
-def cauchy(x, mean, gamma=0.01):
-    return 1/(1 + ((x - mean) / gamma)**2) + 0.5/(1 + ((x - mean-2) / gamma)**2)\
-        + 0.25/(1 + ((x - mean-3/2) / gamma)**2) + 0.125/(1 + ((x - mean-4/3) / gamma)**2)
-def gauss(x, mean, sigma=0.01):
-    return np.exp(-(x - mean)**2 / 2/sigma**2) + 0.5*np.exp(-(x - mean)**2 / 2/sigma**2)\
-        + 0.25*np.exp(-(x - mean)**2 / 2/sigma**2) + 0.125*np.exp(-(x - mean)**2 / 2/sigma**2)
 
 def compile(filename):
     header, instruments, notes = parse(filename)
@@ -22,46 +15,35 @@ def compile(filename):
     mesher = Mesher(header, instruments)
 
     octaves = np.linspace(0, 7, 7*32)
-    div_times = np.linspace(0, CHUNK_LENGTH, SAMPLE_RATE*CHUNK_LENGTH // SUBDIVIDE)
+    div_times = np.linspace(0, CHUNK_LENGTH * header.bpm / 60, int(SAMPLE_RATE*CHUNK_LENGTH / SUBDIVIDE))
     frequencies = MIDDLE_C * 2**(octaves-3)
     amplitudes = np.zeros((len(frequencies), len(div_times)))
 
-    def want_octave(t):
-        index = int(t / CHUNK_LENGTH * 24)
-        if index == 0:
-            return 3
-        if index == 1:
-            return 3-0.1663
-        if index <= 8:
-            return 3
-        if index < 12:
-            return None
-        if index == 12:
-            return 3-0.1663
-        if index == 13:
-            return 3-0.333
-        if index == 14:
-            return 3-0.4165
-        if index == 15:
-            return 3-0.583
-        if index <= 19:
-            return 3-0.666
-        if index <= 23:
-            return 3-0.583
-
+    on_notes = []
     for i, t in enumerate(div_times):
-        want = want_octave(t)
-        if want is not None:
-            amplitudes[:,i] += gauss(octaves, want)
+        # Turn on notes
+        while len(notes) > 0 and notes[0].check(t):
+            on_notes.append(notes[0])
+            del notes[0]
+        
+        # Turn off notes
+        note_index = 0
+        while note_index < len(on_notes):
+            if not on_notes[note_index].check(t):
+                del on_notes[note_index]
+            else:
+                note_index += 1
 
-    plt.pcolormesh(div_times, octaves, amplitudes)
+        for n in on_notes:
+            amplitudes[:,i] += instruments[n.inst].amp(t-n.full_start, n.full_dur) * instruments[n.inst].profile(octaves, n.oct)
+
+    c = plt.pcolormesh(div_times, octaves, amplitudes)
+    plt.colorbar(c)
     plt.figure()
 
-    times = np.linspace(0, CHUNK_LENGTH, SAMPLE_RATE*CHUNK_LENGTH)
-    sub_times = times.reshape(amplitudes.shape[1], -1)
+    times = np.linspace(0, CHUNK_LENGTH, int(SAMPLE_RATE*CHUNK_LENGTH))
     template_array = np.cos(np.outer(frequencies, times) * 2 * np.pi)
     template_array = template_array.reshape((template_array.shape[0], amplitudes.shape[1], -1))
-    print(template_array.shape)
 
     data = np.zeros((template_array.shape[1]-1, template_array.shape[2]))
     for slice_index in range(amplitudes.shape[1]-1):
